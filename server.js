@@ -1,15 +1,22 @@
+'use strict';
+
+process.env.DEBUG = 'actions-on-google:*';
 
 var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     https = require('https'),
+    bodyParser = require('body-parser');
     express = require('express');
+
 
 var app = express();
 
 var port=8082;
 
 app.use(express.static('public'));
+app.use(bodyParser.json());
+
 
 app.get('/',function(req,res){
         res.send('Damn express!')
@@ -22,11 +29,47 @@ app.get(letsencryptRoute,function(req,res){
 	res.send(letsencryptContent);
 });
 
+var chosenWord='';
+var gameRedWordsQuestion =  function () {
+	chosenWord='all';
+	return {
+		speech:'Read this word',
+		displayText:chosenWord 
+	}	
+}
+
+var gameRedWordsAnswer = function (body) {
+	
+	var speech = body.result.parameters.word;
+
+	console.log('user said ',speech);
+
+	if ( speech == chosenWord ) {
+		var praise = 'very good';
+	}else {
+		var praise = 'hmmm, the word was ' + chosenWord +'. Maybe next time';
+	}
+	
+	return {
+		speech:praise
+	}
+
+}
+
 app.post('/action',function(req,res){
-	console.log('action');
-	var response = {
-		speech: 'hello actions' 
-	};
+	
+	var action = req.body.result.action;
+	console.log('action', action);
+
+	if ( action == "game.words.red.question" ) {
+		var response = gameRedWordsQuestion();
+	} else if ( action == "game.words.red.answer" ) {
+		var response = gameRedWordsAnswer(req.body);
+	} else {	
+		var response = {
+			speech: 'hello actions' 
+		};
+	}
 	res.send(response);
 });
 
