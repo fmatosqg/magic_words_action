@@ -22,12 +22,6 @@ app.get(letsencryptRoute,function(req,res){
 	res.send(letsencryptContent);
 });
 
-var policyFile='policy.html';
-
-app.get('/policy.html', function(req,res) {
-	res.send(fs.readFileSync(policyFile));
-});
-
 app.post('/action',function(req,res){
 	console.log('action');
 	var response = {
