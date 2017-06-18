@@ -6,7 +6,7 @@ var express = require('express'),
     fs = require('fs'),
     http = require('http'),
     https = require('https'),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
     express = require('express');
 
 
@@ -19,7 +19,8 @@ app.use(bodyParser.json());
 
 
 app.get('/',function(req,res){
-        res.send('Damn express!')
+        res.send('Damn express!');
+        console.log('received get');
 });
 
 var letsencryptRoute='/.well-known/acme-challenge/h68iaMbkBhdCVdwzfbzgeibwVhdpPV9qe5eW02RCyNU';
@@ -29,9 +30,12 @@ app.get(letsencryptRoute,function(req,res){
 	res.send(letsencryptContent);
 });
 
+const redWords = ['all','but','with'];
+
 var chosenWord='';
 var gameRedWordsQuestion =  function () {
-	chosenWord='all';
+    console.log('chose word');
+	chosenWord=redWords[Math.floor(Math.random()*redWords.length)];
 	return {
 		speech:'Read this word',
 		displayText:chosenWord 
@@ -54,7 +58,11 @@ var gameRedWordsAnswer = function (body) {
 		speech:praise
 	}
 
-}
+};
+
+app.get('/action',function(req,res){
+	res.send('get action');
+});
 
 app.post('/action',function(req,res){
 	
@@ -74,13 +82,19 @@ app.post('/action',function(req,res){
 });
 
 var sslFolder='/etc/letsencrypt/live/magicwords.amazingdomain.net/';
-var options = {
-    key: fs.readFileSync(sslFolder + 'privkey.pem'),
-    cert: fs.readFileSync(sslFolder + 'cert.pem'),
-    ca: fs.readFileSync(sslFolder + 'chain.pem'),
-    port: 443,
-	path:'/'
-};
+if (fs.existsSync(sslFolder)) {
+
+	console.log('Found SSL keys');
+    var options = {
+        key: fs.readFileSync(sslFolder + 'privkey.pem'),
+        cert: fs.readFileSync(sslFolder + 'cert.pem'),
+        ca: fs.readFileSync(sslFolder + 'chain.pem'),
+        port: 443,
+        path: '/'
+    };
+} else {
+	var options = {};
+}
 
 var server = app.listen(port,function() {
         var host = server.address().address

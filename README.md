@@ -1,5 +1,6 @@
 # Set up
+<code>sudo apt-get install nodejs npm</code>
 <code>npm install</code>
 
 # Run
-<code>node server</code>
+<code>nodejs server.js</code>
