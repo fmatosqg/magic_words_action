@@ -30,12 +30,20 @@ app.get(letsencryptRoute,function(req,res){
 	res.send(letsencryptContent);
 });
 
-const redWords = ['all','but','with'];
+const redWords = [
+	'all','as','are','at',
+	'but','for',
+	'had','have','he','her','his',
+	'not','on','one','said','so',
+	'they','we','with','you'
+	];
 
 var chosenWord='';
 var gameRedWordsQuestion =  function () {
-    console.log('chose word');
+
 	chosenWord=redWords[Math.floor(Math.random()*redWords.length)];
+
+    console.log('chose word ' ,chosenWord);
 	return {
 		speech:'Read this word',
 		displayText:chosenWord 
@@ -46,19 +54,33 @@ var gameRedWordsAnswer = function (body) {
 	
 	var speech = body.result.parameters.word;
 
-	console.log('user said ',speech);
+	// console.log('user said ',speech);
 
 	if ( speech == chosenWord ) {
-		var praise = 'very good';
+		var praise = 'Very good!';
 	}else {
-		var praise = 'hmmm, the word was ' + chosenWord +'. Maybe next time';
-	}
-	
-	return {
-		speech:praise
+		var praise = 'Oh no! The word was ' + '<break time="1s"/>'+ chosenWord +'<break time="1s"/>' + '. Maybe next time!';
 	}
 
+	const nextWordResponse = gameRedWordsQuestion();
+
+	// https://www.w3.org/TR/speech-synthesis/
+	const pause = '<break time="2s"/>';
+
+	var responseSpeech = '<speak><p>' + praise  + '</p><p>';
+    responseSpeech +=  pause + nextWordResponse.speech + '</p></speak>';
+
+    nextWordResponse.speech = responseSpeech;
+    return nextWordResponse;
+
 };
+
+var ssmlTest = function(body) {
+	return {
+		// speech: '<speak>        Here are <say-as interpret-as="characters">SSML</say-as> samples.                I can pause <break time="3s"/>.    </speak>'
+		speech: '<speak><break time="3s"/></speak>'
+	}
+}
 
 app.get('/action',function(req,res){
 	res.send('get action');
@@ -72,7 +94,9 @@ app.post('/action',function(req,res){
 	if ( action == "game.words.red.question" ) {
 		var response = gameRedWordsQuestion();
 	} else if ( action == "game.words.red.answer" ) {
-		var response = gameRedWordsAnswer(req.body);
+        var response = gameRedWordsAnswer(req.body);
+    } else if ( action == 'test') {
+		var response = ssmlTest();
 	} else {	
 		var response = {
 			speech: 'hello actions' 
