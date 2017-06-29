@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 process.env.DEBUG = 'actions-on-google:*';
 
@@ -38,10 +38,23 @@ const redWords = [
 	'they','we','with','you'
 	];
 
+const lemonWords = [
+	'any', 'fell', 'last', 'red', 'time',
+	'because', 'gave', 'long', 'sat', 'very',
+	'blue','green', 'morning', 'soon', 'why',
+	'every', 'house', 'open', 'than', 'year'
+	];
+
+
 var chosenWord='';
+var score = 0;
 var gameRedWordsQuestion =  function () {
 
-	chosenWord=redWords[Math.floor(Math.random()*redWords.length)];
+	
+	var words = redWords;
+	words = lemonWords;
+
+	chosenWord=words[Math.floor(Math.random()*words.length)];
 
     console.log('chose word ' ,chosenWord);
 	return {
@@ -57,7 +70,9 @@ var gameRedWordsAnswer = function (body) {
 	// console.log('user said ',speech);
 
 	if ( speech == chosenWord ) {
-		var praise = 'Very good!';
+		score = score + 1
+		var praise = 'Very good!' + 'You have ' + score + ' points';
+
 	}else {
 		var praise = 'Oh no! The word was ' + '<break time="1s"/>'+ chosenWord +'<break time="1s"/>' + '. Maybe next time!';
 	}
